@@ -1,0 +1,22 @@
+{
+ "n": 100,
+ "checkpoints": {
+  "E5": {
+   "n": 100,
+   "hop_acc": 1.0,
+   "complexity_acc": 1.0,
+   "multihop_acc": 1.0,
+   "intent_f1": 0.975,
+   "mean": 1.0
+  },
+  "E6": {
+   "n": 100,
+   "hop_acc": 0.99,
+   "complexity_acc": 0.99,
+   "multihop_acc": 1.0,
+   "intent_f1": 0.955,
+   "mean": 0.9933
+  }
+ },
+ "note": "labels from air/data/processed_clean/eval_holdout.jsonl (eval questions removed from all training splits); E5 and earlier saw these questions, E6 did not"
+}

@@ -1,0 +1,94 @@
+{
+ "manifest": {
+  "tag": "v2kgce",
+  "systems": [
+   "v2_ce_rerank",
+   "v2_ce_rerank_kg"
+  ],
+  "n_questions": 100,
+  "workers": 4,
+  "seed": 42,
+  "index_seconds": 1.3,
+  "index": {
+   "chunks": 8070,
+   "entities": 56051,
+   "cooccur_edges": 343219,
+   "avg_entity_degree": 12.25
+  },
+  "model_a": {
+   "ok": true,
+   "error": null
+  },
+  "reranker": {
+   "available": true,
+   "kind": "onnx",
+   "model_dir": "<RERANKER_DIR>",
+   "error": null
+  },
+  "semantic": {
+   "local": {
+    "index": {
+     "chunks": 8070,
+     "dim": 1024,
+     "built_at": "2026-11-16 12:22:27",
+     "seconds": 20.78,
+     "corpus_fingerprint": "188ee3cea8260a16"
+    },
+    "vectors": 8070,
+    "embedder": {
+     "backend": "local",
+     "kind": "e5",
+     "name": "e5-local",
+     "model_dir": "<MODELS_DIR>/multilingual-e5-large",
+     "dim": 1024,
+     "device": "cuda",
+     "max_len": 512,
+     "cached_queries": 0
+    }
+   }
+  },
+  "model": "deepseek-v4.1-flash",
+  "started_at": "2026-11-16 15:37:06",
+  "usage": {
+   "llm_calls": 400,
+   "prompt_tokens": 865016,
+   "completion_tokens": 39698,
+   "reasoning_tokens": 0,
+   "total_tokens": 904714,
+   "llm_latency_ms": 0.0,
+   "cache_hits": 400,
+   "llm_errors": 0
+  },
+  "finished_at": "2026-11-16 15:39:41"
+ },
+ "summary": [
+  {
+   "system": "v2_ce_rerank",
+   "n": 100,
+   "em": 0.49,
+   "f1": 0.6179,
+   "containment": 0.55,
+   "evidence_recall_final": 0.7575,
+   "evidence_recall_retrieved": 0.8442,
+   "avg_rounds": 2.1,
+   "avg_llm_calls": 2.0,
+   "avg_latency_ms": 3071.9,
+   "errors": 0,
+   "wall_seconds": 78.1
+  },
+  {
+   "system": "v2_ce_rerank_kg",
+   "n": 100,
+   "em": 0.46,
+   "f1": 0.5945,
+   "containment": 0.52,
+   "evidence_recall_final": 0.76,
+   "evidence_recall_retrieved": 0.8442,
+   "avg_rounds": 2.1,
+   "avg_llm_calls": 2.0,
+   "avg_latency_ms": 3010.2,
+   "errors": 0,
+   "wall_seconds": 76.6
+  }
+ ]
+}

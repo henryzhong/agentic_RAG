@@ -1,0 +1,113 @@
+{
+ "manifest": {
+  "tag": "v2vllm",
+  "systems": [
+   "v2_full",
+   "v2_vllm"
+  ],
+  "n_questions": 40,
+  "workers": 4,
+  "seed": 42,
+  "index_seconds": 1.4,
+  "index": {
+   "chunks": 8070,
+   "entities": 56051,
+   "cooccur_edges": 343219,
+   "avg_entity_degree": 12.25
+  },
+  "model_a": {
+   "ok": true,
+   "error": null
+  },
+  "reranker": {
+   "available": true,
+   "kind": "onnx",
+   "model_dir": "<RERANKER_DIR>",
+   "error": null
+  },
+  "semantic": {
+   "local": {
+    "index": {
+     "chunks": null,
+     "dim": null,
+     "built_at": null,
+     "seconds": null,
+     "corpus_fingerprint": null
+    },
+    "vectors": 8070,
+    "embedder": {
+     "backend": "local",
+     "kind": "e5",
+     "name": "e5-local",
+     "model_dir": "<MODELS_DIR>/multilingual-e5-large",
+     "dim": 1024,
+     "device": "cuda",
+     "max_len": 512,
+     "cached_queries": 0
+    }
+   },
+   "vllm": {
+    "index": {
+     "chunks": 8070,
+     "dim": 1024,
+     "built_at": "2026-11-16 12:05:50",
+     "seconds": 19.99,
+     "corpus_fingerprint": "188ee3cea8260a16"
+    },
+    "vectors": 8070,
+    "embedder": {
+     "backend": "vllm",
+     "kind": "e5",
+     "name": "e5-vllm",
+     "endpoint": "http://127.0.0.1:18000/v1",
+     "model": "multilingual-e5-large",
+     "dim": 1024,
+     "cached_queries": 0
+    }
+   }
+  },
+  "model": "deepseek-v4.1-flash",
+  "started_at": "2026-11-16 12:16:08",
+  "usage": {
+   "llm_calls": 160,
+   "prompt_tokens": 294579,
+   "completion_tokens": 15800,
+   "reasoning_tokens": 0,
+   "total_tokens": 310379,
+   "llm_latency_ms": 22900.0,
+   "cache_hits": 159,
+   "llm_errors": 0
+  },
+  "finished_at": "2026-11-16 12:17:06"
+ },
+ "summary": [
+  {
+   "system": "v2_full",
+   "n": 40,
+   "em": 0.475,
+   "f1": 0.5856,
+   "containment": 0.55,
+   "evidence_recall_final": 0.7875,
+   "evidence_recall_retrieved": 0.8625,
+   "avg_rounds": 1.4,
+   "avg_llm_calls": 2.0,
+   "avg_latency_ms": 2420.3,
+   "errors": 0,
+   "wall_seconds": 25.1
+  },
+  {
+   "system": "v2_vllm",
+   "n": 40,
+   "em": 0.475,
+   "f1": 0.5856,
+   "containment": 0.55,
+   "evidence_recall_final": 0.7875,
+   "evidence_recall_retrieved": 0.8625,
+   "avg_rounds": 1.4,
+   "avg_llm_calls": 2.0,
+   "avg_latency_ms": 2615.7,
+   "errors": 0,
+   "wall_seconds": 33.4
+  }
+ ]
+}

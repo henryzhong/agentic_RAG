@@ -1,0 +1,105 @@
+{
+ "manifest": {
+  "tag": "audit_rerun",
+  "systems": [
+   "v2_full",
+   "v2_llm_judge",
+   "v2_no_dense"
+  ],
+  "n_questions": 100,
+  "workers": 4,
+  "seed": 42,
+  "index_seconds": 1.3,
+  "index": {
+   "chunks": 8070,
+   "entities": 56051,
+   "cooccur_edges": 343219,
+   "avg_entity_degree": 12.25
+  },
+  "model_a": {
+   "ok": true,
+   "error": null,
+   "checkpoint": "E6"
+  },
+  "reranker": null,
+  "semantic": {
+   "local": {
+    "index": {
+     "chunks": 8070,
+     "dim": 1024,
+     "built_at": "2026-11-16 15:56:41",
+     "seconds": 22.52,
+     "corpus_fingerprint": "a97d3b0020da8e6b"
+    },
+    "vectors": 8070,
+    "embedder": {
+     "backend": "local",
+     "kind": "e5",
+     "name": "e5-local",
+     "model_dir": "<MODELS_DIR>/multilingual-e5-large",
+     "dim": 1024,
+     "device": "cuda",
+     "max_len": 512,
+     "cached_queries": 0
+    }
+   }
+  },
+  "model": "deepseek-v4.1-flash",
+  "started_at": "2026-11-16 15:57:49",
+  "usage": {
+   "llm_calls": 737,
+   "prompt_tokens": 1445652,
+   "completion_tokens": 71756,
+   "reasoning_tokens": 0,
+   "total_tokens": 1517408,
+   "llm_latency_ms": 1350018.8,
+   "cache_hits": 0,
+   "llm_errors": 0
+  },
+  "finished_at": "2026-11-16 16:04:08"
+ },
+ "summary": [
+  {
+   "system": "v2_full",
+   "n": 100,
+   "em": 0.48,
+   "f1": 0.6053,
+   "containment": 0.54,
+   "evidence_recall_final": 0.7608,
+   "evidence_recall_retrieved": 0.8467,
+   "avg_rounds": 2.1,
+   "avg_llm_calls": 2.0,
+   "avg_latency_ms": 4450.7,
+   "errors": 0,
+   "wall_seconds": 113.4
+  },
+  {
+   "system": "v2_llm_judge",
+   "n": 100,
+   "em": 0.59,
+   "f1": 0.6963,
+   "containment": 0.67,
+   "evidence_recall_final": 0.8325,
+   "evidence_recall_retrieved": 0.9275,
+   "avg_rounds": 2.0,
+   "avg_llm_calls": 3.4,
+   "avg_latency_ms": 6459.1,
+   "errors": 0,
+   "wall_seconds": 165.1
+  },
+  {
+   "system": "v2_no_dense",
+   "n": 100,
+   "em": 0.44,
+   "f1": 0.55,
+   "containment": 0.49,
+   "evidence_recall_final": 0.7208,
+   "evidence_recall_retrieved": 0.785,
+   "avg_rounds": 2.1,
+   "avg_llm_calls": 2.0,
+   "avg_latency_ms": 3964.8,
+   "errors": 0,
+   "wall_seconds": 100.5
+  }
+ ]
+}
