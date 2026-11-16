@@ -52,6 +52,14 @@ SYSTEMS: dict[str, SystemSpec] = {
     "v2_llm_rerank": SystemSpec("v2_llm_rerank", PipelineOptions(rerank="llm")),
     "v2_no_judge": SystemSpec("v2_no_judge", PipelineOptions(use_judge=False)),
     "v2_llm_judge": SystemSpec("v2_llm_judge", PipelineOptions(judge_kind="llm")),
+    # P1 answer-side 2x2 (docs/PLAN_2026-11-16.md §5): prompt/verifier x compare route
+    "v2_llm_v2prompt": SystemSpec("v2_llm_v2prompt",
+                                  PipelineOptions(judge_kind="llm", answer_prompt="v2",
+                                                  use_compare=False)),
+    "v2_llm_v2prompt_compare": SystemSpec("v2_llm_v2prompt_compare",
+                                          PipelineOptions(judge_kind="llm", answer_prompt="v2")),
+    "v2_llm_v3prompt": SystemSpec("v2_llm_v3prompt",
+                                  PipelineOptions(judge_kind="llm", use_compare=False)),
     # does the cross-encoder ordering, or the controller, explain v1's answer-side
     # advantage? score order + LLM controller = exactly v1's combination.
     "v2_llm_judge_norerank": SystemSpec("v2_llm_judge_norerank",
@@ -72,7 +80,8 @@ SYSTEMS: dict[str, SystemSpec] = {
 SYSTEM_ORDER = ["v2_direct", "v2_full", "v2_no_dense", "v2_vllm", "v2_no_rerank",
                 "v2_ce_rerank", "v2_ce_rerank_kg", "v2_no_rel", "v2_kg", "v2_v1prompt",
                 "v2_rounds4", "v2_llm_rerank",
-                "v2_no_judge", "v2_llm_judge", "v2_llm_judge_norerank",
+                "v2_no_judge", "v2_llm_judge", "v2_llm_v2prompt", "v2_llm_v2prompt_compare",
+                "v2_llm_v3prompt", "v2_llm_judge_norerank",
                 "v2_llm_judge_kg", "v2_ce_rerank_llmjudge",
                 "v2_no_planner", "v2_keep"]
 

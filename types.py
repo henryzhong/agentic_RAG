@@ -16,6 +16,7 @@ class SearchMode(str, Enum):
     KEEP = "keep"        # the question is already a good query
     REWRITE = "rewrite"  # search one or more rewritten / decomposed queries
     GRAPH = "graph"      # entity-graph first (bridge questions)
+    COMPARE = "compare"  # two entities, shared attribute or a comparison
 
     @classmethod
     def coerce(cls, value: object, default: "SearchMode | None" = None) -> "SearchMode":
@@ -219,6 +220,8 @@ class AnswerResult:
     sufficient: bool = True             # the answer model's own evidence verdict
     missing: str = ""
     facts: list[str] = field(default_factory=list)
+    candidates: list[str] = field(default_factory=list)
+    answer_source: str = "primary"       # primary | candidate | fallback
     cited_docs: list[str] = field(default_factory=list)
     block_ids: dict[int, str] = field(default_factory=dict)
     error: str | None = None
@@ -226,7 +229,9 @@ class AnswerResult:
     def to_dict(self) -> dict:
         return {"answer": self.answer, "confidence": self.confidence,
                 "sufficient": self.sufficient, "missing": self.missing,
-                "facts": list(self.facts), "cited_docs": list(self.cited_docs),
+                "facts": list(self.facts), "candidates": list(self.candidates),
+                "answer_source": self.answer_source,
+                "cited_docs": list(self.cited_docs),
                 "block_n": len(self.block_ids), "error": self.error}
 
 

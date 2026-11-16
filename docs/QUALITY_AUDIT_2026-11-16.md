@@ -352,10 +352,12 @@ d0453e7e137df615  REJECTED ValueError: index cache ...npz has no ids sidecar; re
 
 （第二条命令应打印 `"cached": true`；把语料改一个字再跑，会打印 `cache_error: corpus fingerprint mismatch` 并重建。）
 
-> 顺带修掉一个"文档与现实不一致"的问题：README 说 G 盘的模型"默认就会找到"，
-> 但 `config.e5_model_dir()` 只认 `RAGV2_E5_DIR` 与仓库内 `models/`，在干净的进程里
-> `build_embeddings.py --verify` 会直接报 `multilingual-e5-large not found`。
-> 已把 `RAGV2_E5_DIR_VLLM` 指定的模型目录 加入候选目录，现在无需任何环境变量。
+> 顺带修掉一个"文档与现实不一致"的问题：README 说模型目录"默认就会找到"，
+> 但 `config.e5_model_dir()` 只认 `RAGV2_E5_DIR` / `RAGV2_E5_DIR_VLLM` 与仓库内 `models/`，
+> 在干净的进程里 `build_embeddings.py --verify` 会直接报 `multilingual-e5-large not found`，
+> 而 `run_eval.py` 只会打印 `[semantic:local] UNAVAILABLE` 然后**静默退化成纯词法检索**
+> （本次 P1 的第一次 A/B 就踩到了：manifest 里 `semantic.local = null`，整批没有 dense）。
+> README §4.1 现在写明这两个变量，并要求跑分前先确认 manifest 的 `semantic` 不是 `null`。
 
 ---
 
@@ -497,7 +499,7 @@ $PY = "<PYTHON_EXE>"
 | [stages/analyze.py](../stages/analyze.py) | docstring 更正（不再是"缺模型就降级"） |
 | [stages/search.py](../stages/search.py) | `_best_per_chunk`：每路由每 chunk 一票 |
 | [retrieval/vector.py](../retrieval/vector.py) | 内容指纹、JSON sidecar、`allow_pickle=False`、4 项加载校验 |
-| [config.py](../config.py) | `E5_CANDIDATE_DIRS` 补上 `RAGV2_E5_DIR_VLLM` 指定的模型目录：此前只有 README 写了这个路径，`config.e5_model_dir()` 不认识它，导致 `build_embeddings.py` 在干净进程里报 "multilingual-e5-large not found" |
+| [config.py](../config.py) | `E5_CANDIDATE_DIRS` 增加 `RAGV2_E5_DIR_VLLM`：此前只有 README 写了模型路径，`config.e5_model_dir()` 不认识它，导致 `build_embeddings.py` 在干净进程里报 "multilingual-e5-large not found" |
 | [models/embedder.py](../models/embedder.py) | `identity()` / `expected_dim`；`CachedEmbedder` key 归一 |
 | [tests/fakes.py](../tests/fakes.py) | `FakeAnalyzer.require()`；新增 `BrokenAnalyzer` |
 | [tests/test_pipeline.py](../tests/test_pipeline.py) | 3 个新测试取代 `use_model_a=False` 用例 |

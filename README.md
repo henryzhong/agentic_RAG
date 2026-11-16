@@ -16,6 +16,14 @@
 > 质量审计：[`docs/QUALITY_AUDIT_2026-11-16.md`](docs/QUALITY_AUDIT_2026-11-16.md) ——
 > 数据泄露核查与去泄露重训、Model A 无条件化、plan/judge 输出契约、向量缓存五个缺陷、
 > 融合层重复计票实测（94/100 题）、修复后真实重跑
+>
+> 提升计划：[`docs/PLAN_2026-11-16.md`](docs/PLAN_2026-11-16.md) ——
+> 41 个失败的逐类拆解（31/41 正确 span 已在池里）、chunking 结构评估（不重切语料）、
+> **KG 按需启用**设计（门控 + 5 个消融臂）、P0~P4 分阶段路线
+>
+> P1 实验报告：[`docs/P1_AB_2026-11-16.md`](docs/P1_AB_2026-11-16.md) ——
+> 答案侧 3 项改动经 **3 次重复**测得 EM **0.610 → 0.640**（+3pt，从不更差），
+> 并给出"单批次 100 题噪声 sd≈1.4pt"的方法论修正
 
 ```
 Question
@@ -125,8 +133,16 @@ stale 并重建，不会悄悄用旧向量（详见审计文档第 4 节）。
 # 后端选择
 $env:RAGV2_EMBED_BACKEND = "vllm"        # local | vllm
 $env:RAGV2_EMBED_ENDPOINT = "http://127.0.0.1:18000/v1"
-$env:RAGV2_E5_DIR = "<MODELS_DIR>/multilingual-e5-large"   # 默认就会找到
+
+# E5 权重位置：仓库内 models/multilingual-e5-large 会被自动找到，
+# 放在别处（例如挂载的模型卷）时必须显式给一个：
+$env:RAGV2_E5_DIR      = "<MODELS_DIR>/multilingual-e5-large"   # 首选位置
+$env:RAGV2_E5_DIR_VLLM = "<MODELS_DIR>/multilingual-e5-large"   # 备用位置（vLLM 卷）
 ```
+
+> 不设这两个变量且仓库内没有权重时，`dense` 路由会打印
+> `[semantic:local] UNAVAILABLE …` 并静默退化成纯词法检索 —— 看 manifest 的
+> `semantic` 字段确认它是否真的启用了。
 
 ### 4.2 用 G 盘的 vLLM 起 embedding 服务
 
@@ -194,7 +210,8 @@ agentic_rag_v2/
   eval/               # 指标（与 v1 一致）+ 多系统 runner
   scripts/            # smoke.py / run_eval.py / analyze.py / build_embeddings.py
                       # audit_leakage.py / make_clean_split.py / eval_model_a_holdout.py
-                      # audit_fusion.py / diagnose_gap.py
+                      # audit_fusion.py / audit_answer_headroom.py / compare_repeats.py
+                      # diagnose_gap.py
                       # serve_vllm_embed.sh|ps1
   tests/              # 107 个离线单测（scripted LLM / fake reranker / fake embedder）
 ```
@@ -232,6 +249,14 @@ $PY = "<PYTHON_EXE>"
 & $PY agentic_rag_v2/scripts/eval_model_a_holdout.py --checkpoints E5,E6
 & $PY agentic_rag_v2/scripts/audit_fusion.py           # 融合重复计票的影响面
 
+# P1：重复实验对比（单批次噪声 sd≈1.4pt，必须 3 次重复）
+& $PY agentic_rag_v2/scripts/compare_repeats.py `
+    --base v2_llm_v2prompt --vs v2_llm_judge --tags p1_ab,p1_rep2,p1_rep3
+
+# 提升计划基线测量（见 docs/PLAN_2026-11-16.md §1）
+& $PY agentic_rag_v2/scripts/audit_answer_headroom.py `
+    --records agentic_rag_v2/results/audit_rerun/v2_llm_judge.jsonl
+
 # live 集成测试（含 vLLM 一致性校验）
 $env:RAGV2_LIVE = "1"
 $env:RAGV2_VLLM_ENDPOINT = "http://127.0.0.1:18000/v1"
@@ -254,6 +279,9 @@ $env:RAGV2_VLLM_ENDPOINT = "http://127.0.0.1:18000/v1"
 | `v2_llm_judge_norerank` | LLM judge + 分数序（`v2_llm_judge` 的显式写法） |
 | `v2_llm_judge_kg` | LLM judge + 分数序 + KG 注入（用于检验关系注入在最优档是否有害） |
 | `v2_no_judge` | 去掉 judge（固定一轮） |
+| `v2_llm_v2prompt` | LLM judge + v2 答案提示词 + 关掉比较题路由（= P1 之前的旧行为） |
+| `v2_llm_v2prompt_compare` | LLM judge + v2 提示词，只开比较题路由 |
+| `v2_llm_v3prompt` | LLM judge + v3 提示词（候选答案 + 校验器），关掉比较题路由 |
 | `v2_no_planner` | 去掉规划 LLM（确定性启发式路由） |
 | `v2_keep` | 强制 keep 路线 |
 | `v2_direct` | 无检索下界（**仍然走 Model A**：没有任何臂能绕过第一段） |

@@ -150,7 +150,7 @@ COVERAGE_BEST_PASSAGE_THRESHOLD = 0.50
 # The local judge only runs when another round is still affordable inside the
 # plan; a one-round question is answered straight away.
 
-PROMPT_VERSION = "v2.0"
+PROMPT_VERSION = "v3.0"
 
 
 @dataclass(frozen=True)

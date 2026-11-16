@@ -70,6 +70,71 @@ Rules:
 Return ONLY JSON: {"ranking": [<passage ids, best first>], "reason": "<one sentence>"}"""
 
 # --------------------------------------------------------------------- stage 5
+# v3: answer-side repair pass. Everything here was derived from the measured
+# failure taxonomy in docs/PLAN_2026-11-16.md §1: 12/41 failures were refusals,
+# 15/41 were span-shape errors (too long / too short), 10/41 were comparison
+# questions. The model now nominates alternative surface forms so that a
+# deterministic verifier can reject an answer that is not verbatim in the
+# evidence, instead of trusting one string.
+ANSWER_SYSTEM_V3 = """You are a grounded multi-hop question-answering engine.
+Answer the QUESTION using ONLY the numbered EVIDENCE. Do not use outside knowledge.
+
+Work in TWO steps inside ONE JSON object:
+1. relevant_facts: short standalone statements copied from the evidence, including
+   bridge facts that only become useful AFTER chaining with another fact.
+2. answer: the SHORTEST verbatim span from the evidence that answers the question.
+
+Return ONLY JSON:
+{"relevant_facts": ["<fact 1>", "<fact 2>", ...],
+ "answer": "<shortest verbatim span>",
+ "answer_candidates": ["<1-3 alternative surface forms of the SAME answer>"],
+ "evidence_ids": [<numbers actually required to derive the answer>],
+ "confidence": <0..1>,
+ "sufficient": true|false,
+ "missing": "<if sufficient is false: the specific fact/entity that is missing, else empty>"}
+
+`answer_candidates` exists so a verifier can pick a form that literally appears in the
+evidence: list the exact spellings the passages use (e.g. "Tokyo", "Musashino, Tokyo,
+Japan"), shortest last. Never list a different answer there.
+
+Rules for `answer`:
+- PREFER ANSWERING. If a passage states the asked fact - even in different wording,
+  or as part of a longer sentence - extract it. Refusal is the last resort.
+- Use "UNKNOWN" ONLY when no passage mentions the asked entity or relation at all.
+  If the question's entities appear in the evidence but the fact is only implied,
+  give your best supported span with a low confidence instead of "UNKNOWN".
+- Answer with the SHORTEST span that still answers the question. Never add a
+  category noun or a qualifier the question did not ask for:
+  "film director" -> "director"; "Musashino, Tokyo, Japan" -> "Tokyo";
+  "right-hand batsman" -> "right-hand"; "reported to the Politburo" -> "the Politburo".
+- Keep a unit or qualifier that the evidence uses when the question asks for a
+  quantity or a duration: "22 times" stays "22 times", not "22".
+- For yes/no comparison questions output exactly "yes" or "no".
+- On multi-hop questions the answer usually comes from the SECOND passage in the chain,
+  not from the passage that merely repeats the question's entity.
+- If the evidence states the fact with an old name, a rename or an alias, resolve it and
+  copy the surface form the evidence uses.
+- If several candidates compete, choose the one the evidence supports and lower confidence.
+- evidence_ids must be a subset of the provided numbers, and must include every passage
+  the chain goes through (bridge passage AND answer passage).
+
+`sufficient` describes the EVIDENCE, not your willingness to guess: set it true whenever
+`answer` is not "UNKNOWN", and false only together with "UNKNOWN" and a filled `missing`
+field."""
+
+# Appended only for comparison / intersection questions (mode = compare).
+COMPARE_BLOCK = """THIS IS A COMPARISON QUESTION.
+Follow this order, still inside the same JSON object:
+1. relevant_facts: one copied sentence per entity, stating the asked attribute
+   (or the attribute the two entities are being compared on).
+2. answer:
+   - "in common" / "both" / "share" / "same" questions -> the SHARED attribute, using
+     the plural form the evidence uses ("trees", "cocktails", "directors").
+   - "who is older / larger / achieved more / which has more" -> the winning entity,
+     copied with the full name spelling the evidence uses.
+Do not answer with a superordinate category that no passage states, and do not answer
+with one of the two entities' attributes when the question asks what they share."""
+
 # v1's tuned answer protocol, kept verbatim so the "is v2's schema costing EM?"
 # question can be answered by an A/B instead of an opinion.
 ANSWER_SYSTEM_V1 = """You are a grounded multi-hop question-answering engine.

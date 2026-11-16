@@ -44,7 +44,8 @@ class PipelineOptions:
     rerank: str = "score"           # score | local | llm. Measured: cross-encoder
                                     # ordering improves gold-doc rank@k but costs ~7pt
                                     # EM on multi-hop answer selection (README §9.3)
-    answer_prompt: str = "v2"       # v2 (sufficiency schema) | v1 (pure answer schema)
+    answer_prompt: str = "v3"       # v3 (answer candidates + verifier) | v2 | v1
+    use_compare: bool = True        # deterministic comparison-question routing
     force_mode: SearchMode | None = None
     max_rounds: int | None = None
     answer_top_n: int = config.ANSWER_TOP_N
@@ -131,7 +132,8 @@ class AgenticRAG:
 
         plan = make_plan(question, signal, budget, self.client,
                          use_llm=self.options.use_planner_llm,
-                         force_mode=self.options.force_mode)
+                         force_mode=self.options.force_mode,
+                         use_compare=self.options.use_compare)
         trace.append({"stage": "plan", "plan": plan.to_dict()})
 
         search = run_search(question, plan, self.retriever, self.judge,
@@ -151,7 +153,8 @@ class AgenticRAG:
                         max_chars=self.options.answer_max_chars,
                         retriever=self.retriever,
                         relations=self.relations,
-                        prompt=self.options.answer_prompt)
+                        prompt=self.options.answer_prompt,
+                        mode=plan.mode)
         trace.append({"stage": "answer", "answer": result.to_dict()})
 
         llm_calls = (1 if plan.source == "llm" else 0) + search.llm_calls + ranking.llm_calls + 1
